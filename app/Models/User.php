@@ -8,16 +8,25 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class User extends Authenticatable implements FilamentUser
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes;
+
+
+    const ROLE_ADMIN = 'admin';
+    const ROLE_KASIR = 'kasir';
+    const ROLE_GUDANG = 'gudang';
 
     protected $fillable = [
         'name',
         'email',
         'password',
         'address',
+        'role',
+        'profile_picture',
     ];
 
     protected $hidden = [
@@ -35,6 +44,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        // Only allow users with allowed roles to access Filament
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_KASIR, self::ROLE_GUDANG]);
     }
 }
