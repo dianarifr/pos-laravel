@@ -6,11 +6,15 @@
 ```bash
 composer install
 ```
+
 ```bash
-npm install && npm run build```
+npm install && npm run build
+```
+
 ```bash
 cp .env.example .env
 ```
+
 ```bash
 APP_NAME='POS'
 APP_ENV=[env(local/dev/production)]
@@ -25,12 +29,15 @@ DB_DATABASE=
 DB_USERNAME=[username_database]
 DB_PASSWORD=[password_database]
 ```
+
 ```bash
 php artisan key:generate
 ```
+
 ```bash
 php artisan migrate --seed
 ```
+
 ```bash
 php artisan storage:link
 ```
