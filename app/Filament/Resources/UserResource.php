@@ -28,7 +28,8 @@ class UserResource extends Resource
                 ->label('Email')
                 ->email()
                 ->unique(ignoreRecord: true)
-                ->required(),
+                ->required()
+                ->readonly(fn (string $context): bool => $context === 'edit'),
             Forms\Components\TextInput::make('password')
                 ->label('Password')
                 ->password()
