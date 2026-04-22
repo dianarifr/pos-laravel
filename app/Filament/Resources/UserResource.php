@@ -32,10 +32,12 @@ class UserResource extends Resource
             Forms\Components\TextInput::make('password')
                 ->label('Password')
                 ->password()
-                ->dehydrateStateUsing(fn($state) => $state ? bcrypt($state) : null)
-                ->required(fn($record) => !$record)
+                ->required(fn (string $context): bool => $context === 'create')
+                ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
+                ->dehydrated(fn ($state) => filled($state))
                 ->minLength(8)
-                ->maxLength(255),
+                ->maxLength(255)
+                ->placeholder(fn (string $context): string => $context === 'edit' ? 'Kosongkan jika tidak ingin mengubah password' : ''),
             Forms\Components\Textarea::make('address')
                 ->label('Alamat'),
             Forms\Components\Select::make('role')
@@ -49,6 +51,8 @@ class UserResource extends Resource
             Forms\Components\FileUpload::make('profile_picture')
                 ->label('Profile Picture')
                 ->image()
+                ->imageEditor()
+                ->circleCropper()
                 ->directory('profile-pictures')
                 ->maxSize(1024),
         ]);
