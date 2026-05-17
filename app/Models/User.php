@@ -5,16 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Filament\Models\Contracts\HasAvatar;
 
-
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->profile_picture
+            ? Storage::url($this->profile_picture)
+            : null;
+    }
 
     const ROLE_ADMIN = 'admin';
     const ROLE_KASIR = 'kasir';
