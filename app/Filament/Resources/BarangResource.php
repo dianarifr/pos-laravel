@@ -102,10 +102,6 @@ class BarangResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('kategori.nama')
-                    ->label('Kategori')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('unit.nama')
                     ->label('Satuan')
                     ->sortable(),
@@ -118,11 +114,6 @@ class BarangResource extends Resource
                 Tables\Columns\TextColumn::make('harga_jual')
                     ->label('Harga Jual')
                     ->money('IDR')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('stok_minimal')
-                    ->label('Stok Min.')
-                    ->numeric()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('stok')

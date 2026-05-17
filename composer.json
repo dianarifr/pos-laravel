@@ -12,6 +12,7 @@
         "filament/filament": "3.3",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
+        "mews/captcha": "^3.4",
         "spatie/laravel-permission": "^6.0"
     },
     "require-dev": {

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PenjualanPrintController;
+use App\Http\Controllers\CaptchaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,3 +16,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/login', function () {
     return redirect('/admin');
 })->name('login');
+
+// Captcha reload endpoint
+Route::get('/admin/captcha-reload', [CaptchaController::class, 'reloadCaptcha'])->name('custom-captcha-reload');
