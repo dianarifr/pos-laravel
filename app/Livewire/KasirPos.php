@@ -99,38 +99,57 @@ class KasirPos extends Component
     // Scanner: scan/ketik SKU
     // -------------------------------------------------------
 
+    #[Computed]
+    public function searchResults()
+    {
+        if (strlen($this->sku) < 2) {
+            return collect();
+        }
+
+        return Barang::query()
+            ->where(
+                fn($q) => $q->where('nama_barang', 'like', "%{$this->sku}%")
+                    ->orWhere('sku', 'like', "%{$this->sku}%")
+            )
+            ->where('stok', '>', 0)
+            ->orderBy('nama_barang')
+            ->limit(10)
+            ->get();
+    }
+
     public function scanBarcode(): void
     {
         $sku = trim($this->sku);
-        $this->sku = '';
 
         if ($sku === '') {
             return;
         }
 
-        $barang = Barang::where('sku', $sku)->first();
+        // Cari berdasarkan SKU atau nama. Jika ada 1 hasil, langsung tambahkan ke keranjang.
+        $results = Barang::query()
+            ->where(
+                fn($q) => $q->where('nama_barang', 'like', "%{$sku}%")
+                    ->orWhere('sku', 'like', "%{$sku}%")
+            )->get();
 
-        if (! $barang) {
-            $this->flashError = "Barang dengan SKU «{$sku}» tidak ditemukan.";
+        if ($results->count() === 1) {
+            $this->pilihBarang($results->first()->id);
+        } elseif ($results->isEmpty()) {
+            $this->flashError = "Barang dengan kata kunci «{$sku}» tidak ditemukan.";
             $this->dispatch('focus-scanner');
-            return;
         }
-
-        if ($barang->stok <= 0) {
-            $this->flashError = "Stok barang «{$barang->nama_barang}» habis.";
-            $this->dispatch('focus-scanner');
-            return;
-        }
-
-        $this->flashError = null;
-        $this->tambahKeKeranjang($barang);
-        $this->dispatch('focus-scanner');
+        // Jika lebih dari 1, biarkan pengguna memilih dari daftar autocomplete.
     }
 
     private function tambahKeKeranjang(Barang $barang): void
     {
         foreach ($this->keranjang as $i => $item) {
             if ($item['barang_id'] === $barang->id) {
+                $qtyDibutuhkan = $this->keranjang[$i]['qty'] + 1;
+                if (!$this->cekStokCukup($barang, $qtyDibutuhkan)) {
+                    $this->dispatch('focus-scanner');
+                    return;
+                }
                 $this->keranjang[$i]['qty']++;
                 $this->hitungSubtotal($i);
                 return;
@@ -148,14 +167,46 @@ class KasirPos extends Component
         ];
     }
 
+    public function pilihBarang(int $barangId): void
+    {
+        $barang = Barang::find($barangId);
+
+        if (!$barang) {
+            $this->flashError = "Barang tidak ditemukan.";
+            return;
+        }
+
+        if (!$this->cekStokCukup($barang, 1)) {
+            return;
+        }
+
+        $this->flashError = null;
+        $this->tambahKeKeranjang($barang);
+        $this->sku = ''; // Kosongkan input setelah memilih
+        $this->dispatch('focus-scanner');
+    }
+
     public function updateQty(int $index, int $qty): void
     {
         if ($qty < 1) {
             $this->hapusItem($index);
             return;
         }
+
+        // Cek stok sebelum menambah qty
+        $barang = Barang::find($this->keranjang[$index]['barang_id']);
+        if ($barang && !$this->cekStokCukup($barang, $qty)) {
+            // Jika stok tidak cukup, set qty ke stok maksimal yang tersedia & tampilkan error.
+            // Ini akan memaksa input untuk update ke nilai yang valid.
+            $this->keranjang[$index]['qty'] = $barang->stok;
+            $this->hitungSubtotal($index);
+            $this->dispatch('focus-scanner');
+            return; // Error message sudah di-set oleh cekStokCukup()
+        }
+
         $this->keranjang[$index]['qty'] = $qty;
         $this->hitungSubtotal($index);
+        $this->flashError = null;
     }
 
     public function updateDiskon(int $index, int $diskon): void
@@ -167,6 +218,15 @@ class KasirPos extends Component
     public function hapusItem(int $index): void
     {
         array_splice($this->keranjang, $index, 1);
+    }
+
+    private function cekStokCukup(Barang $barang, int $qtyDibutuhkan): bool
+    {
+        if ($barang->stok < $qtyDibutuhkan) {
+            $this->flashError = "Stok barang «{$barang->nama_barang}» tidak mencukupi. Sisa stok: {$barang->stok}.";
+            return false;
+        }
+        return true;
     }
 
     private function hitungSubtotal(int $index): void
@@ -185,6 +245,16 @@ class KasirPos extends Component
         if (empty($this->keranjang)) {
             $this->flashError = 'Keranjang masih kosong.';
             return;
+        }
+
+        // Validasi ulang stok semua item di keranjang sebelum menyimpan
+        foreach ($this->keranjang as $item) {
+            $barang = Barang::find($item['barang_id']);
+            if (!$barang || !$this->cekStokCukup($barang, $item['qty'])) {
+                $this->flashError .= ' Transaksi dibatalkan.';
+                $this->dispatch('focus-scanner');
+                return;
+            }
         }
 
         $bayarInt   = (int) preg_replace('/\D/', '', $this->bayar);

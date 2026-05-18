@@ -156,9 +156,62 @@
     <div class="shrink-0 bg-gray-900 border-b border-gray-700 px-6 py-3">
         <div class="flex items-center gap-3">
             <span class="text-gray-400 text-xs font-mono shrink-0">SCAN / SKU</span>
-            <input id="input-scanner" type="text" wire:model="sku" wire:keydown.enter="scanBarcode"
-                class="flex-1 bg-gray-800 border-2 border-blue-500 text-white text-xl font-mono rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-400 placeholder-gray-600"
-                placeholder="Scan barcode atau ketik SKU lalu tekan ENTER..." autocomplete="off" autofocus>
+            <div class="flex-1 relative" x-data="{
+                highlightedIndex: -1,
+                get results() { return this.$refs.results ? Array.from(this.$refs.results.children) : [] },
+                get open() { return $wire.get('sku').length >= 2 && this.results.length > 0 },
+                moveDown() {
+                    if (!this.open) return;
+                    this.highlightedIndex = (this.highlightedIndex < this.results.length - 1) ? this.highlightedIndex + 1 : 0;
+                    this.scrollToHighlighted();
+                },
+                moveUp() {
+                    if (!this.open) return;
+                    this.highlightedIndex = (this.highlightedIndex > 0) ? this.highlightedIndex - 1 : this.results.length - 1;
+                    this.scrollToHighlighted();
+                },
+                selectItem() {
+                    if (this.highlightedIndex > -1) {
+                        this.results[this.highlightedIndex].click();
+                    } else {
+                        $wire.scanBarcode();
+                    }
+                    this.highlightedIndex = -1;
+                },
+                scrollToHighlighted() {
+                    this.results[this.highlightedIndex]?.scrollIntoView({ block: 'nearest' });
+                },
+                resetHighlight() { this.highlightedIndex = -1; }
+            }">
+                <input id="input-scanner" type="text" wire:model.live.debounce.300ms="sku"
+                    @input.debounce.350ms="resetHighlight()" @keydown.arrow-down.prevent="moveDown()"
+                    @keydown.arrow-up.prevent="moveUp()" @keydown.enter.prevent="selectItem()"
+                    @keydown.escape.prevent="resetHighlight(); $el.blur()"
+                    class="w-full bg-gray-800 border-2 border-blue-500 text-white text-xl font-mono rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-400 placeholder-gray-600"
+                    placeholder="Scan/Cari SKU atau Nama Barang..." autocomplete="off" autofocus>
+
+                {{-- Dropdown hasil pencarian --}}
+                @if (strlen($sku) >= 2 && $this->searchResults->isNotEmpty())
+                <ul x-ref="results"
+                    class="absolute top-full w-full mt-2 z-50 bg-gray-800 border border-gray-600 rounded-lg shadow-xl max-h-80 overflow-y-auto">
+                    @foreach ($this->searchResults as $index => $barang)
+                    <li wire:click="pilihBarang({{ $barang->id }})" wire:key="search-{{ $barang->id }}"
+                        :class="{ 'bg-blue-700': highlightedIndex === {{ $index }} }"
+                        @mouseenter="highlightedIndex = {{ $index }}"
+                        class="px-4 py-3 cursor-pointer hover:bg-blue-700 border-b border-gray-700 last:border-0">
+                        <p class="font-semibold text-white">{{ $barang->nama_barang }}</p>
+                        <p class="text-sm text-gray-400 font-mono">SKU: {{ $barang->sku }} - Stok: {{ $barang->stok }}
+                        </p>
+                    </li>
+                    @endforeach
+                </ul>
+                @elseif(strlen($sku) >= 2 && $this->searchResults->isEmpty() && !$flashError)
+                <div
+                    class="absolute top-full w-full mt-2 z-50 bg-gray-800 border border-gray-600 rounded-lg shadow-xl p-4 text-gray-400 text-center">
+                    Barang tidak ditemukan.
+                </div>
+                @endif
+            </div>
             <span class="text-gray-600 text-xs font-mono shrink-0">F1</span>
         </div>
     </div>
@@ -183,7 +236,7 @@
         {{-- Tabel Keranjang --}}
         <div class="flex-1 overflow-y-auto scroll-thin bg-white">
             @forelse ($keranjang as $i => $item)
-            <div
+            <div wire:key="keranjang-item-{{ $item['barang_id'] }}"
                 class="grid grid-cols-12 gap-2 px-4 py-2 border-b border-gray-100 text-gray-800 text-sm items-center {{ $i % 2 === 0 ? 'bg-white' : 'bg-gray-50' }}">
                 <div class="col-span-1 text-center text-gray-400 font-mono">{{ $i + 1 }}</div>
                 <div class="col-span-4 font-medium">
@@ -193,7 +246,9 @@
                 <div class="col-span-1 flex items-center justify-center gap-1">
                     <button wire:click="updateQty({{ $i }}, {{ $item['qty'] - 1 }})"
                         class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded text-center font-bold leading-none">−</button>
-                    <span class="w-8 text-center font-bold tabular-nums">{{ $item['qty'] }}</span>
+                    <input type="number" min="1" wire:input.debounce.300ms="updateQty({{ $i }}, $event.target.value)"
+                        value="{{ $item['qty'] }}"
+                        class="w-12 text-center font-bold tabular-nums border border-gray-300 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-blue-400">
                     <button wire:click="updateQty({{ $i }}, {{ $item['qty'] + 1 }})"
                         class="w-6 h-6 bg-gray-200 hover:bg-gray-300 rounded text-center font-bold leading-none">+</button>
                 </div>
@@ -201,7 +256,7 @@
                     {{ number_format($item['harga_jual'], 0, ',', '.') }}
                 </div>
                 <div class="col-span-2 text-right">
-                    <input type="number" min="0" wire:change="updateDiskon({{ $i }}, $event.target.value)"
+                    <input type="number" min="0" wire:input.debounce.500ms="updateDiskon({{ $i }}, $event.target.value)"
                         value="{{ $item['diskon'] }}"
                         class="w-full text-right border border-gray-300 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-blue-400">
                 </div>
