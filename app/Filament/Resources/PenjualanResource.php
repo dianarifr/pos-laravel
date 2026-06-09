@@ -54,6 +54,11 @@ class PenjualanResource extends Resource
         return false;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasAnyRole(['Admin', 'Kasir']) ?? false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([]);
