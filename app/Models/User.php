@@ -23,16 +23,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             : null;
     }
 
-    const ROLE_ADMIN = 'admin';
-    const ROLE_KASIR = 'kasir';
-    const ROLE_GUDANG = 'gudang';
+    const ROLE_ADMIN = 'Admin';
+    const ROLE_KASIR = 'Kasir';
+    const ROLE_GUDANG = 'Gudang';
 
     protected $fillable = [
         'name',
         'email',
         'password',
         'address',
-        'role',
         'profile_picture',
     ];
 
@@ -51,7 +50,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Only allow users with allowed roles to access Filament
-        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_KASIR, self::ROLE_GUDANG]);
+        return $this->hasAnyRole([self::ROLE_ADMIN, self::ROLE_KASIR, self::ROLE_GUDANG]);
     }
 }
