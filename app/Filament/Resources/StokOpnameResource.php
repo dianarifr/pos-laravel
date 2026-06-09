@@ -108,7 +108,7 @@ class StokOpnameResource extends Resource
                                 ->numeric()
                                 ->required()
                                 ->default(0)
-                                ->live()
+                                ->live(debounce: 500)
                                 ->afterStateUpdated(function (Get $get, Set $set) {
                                     $set('selisih', (int) $get('stok_fisik') - (int) $get('stok_sistem'));
                                 })
