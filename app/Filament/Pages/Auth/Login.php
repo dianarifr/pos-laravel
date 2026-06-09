@@ -32,7 +32,7 @@ class Login extends BaseLogin
         return TextInput::make('captcha')
             ->label('Verifikasi Captcha')
             ->required()
-            ->placeholder('Masukkan kode captcha di bawah')
+            ->placeholder('Masukkan kode captcha di atas')
             ->rule('captcha')
             ->validationMessages([
                 'captcha' => 'Kode captcha tidak sesuai. Silakan coba lagi.',
