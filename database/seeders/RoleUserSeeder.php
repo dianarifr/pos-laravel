@@ -26,20 +26,20 @@ class RoleUserSeeder extends Seeder
         $admin->assignRole($adminRole);
 
         $kasir = User::updateOrCreate(
-            ['email' => 'kasir@pos.com'],
+            ['email' => 'kasir@mail.com'],
             [
                 'name'     => 'Kasir POS',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('ubahsaya'),
                 'address'  => 'Counter Kasir',
             ]
         );
         $kasir->syncRoles([$kasirRole]);
 
         $gudang = User::updateOrCreate(
-            ['email' => 'gudang@pos.com'],
+            ['email' => 'gudang@mail.com'],
             [
                 'name'     => 'Gudang POS',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('ubahsaya'),
                 'address'  => 'Area Gudang',
             ]
         );
