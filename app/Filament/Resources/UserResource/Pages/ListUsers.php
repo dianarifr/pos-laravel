@@ -14,4 +14,6 @@ class ListUsers extends ListRecords
     {
         return [Actions\CreateAction::make()];
     }
+
+    public function getTitle(): string { return 'User'; }
 }

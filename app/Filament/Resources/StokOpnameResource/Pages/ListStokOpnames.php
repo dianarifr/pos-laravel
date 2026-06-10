@@ -14,4 +14,6 @@ class ListStokOpnames extends ListRecords
     {
         return [Actions\CreateAction::make()];
     }
+
+    public function getTitle(): string { return 'Stok Opname'; }
 }
