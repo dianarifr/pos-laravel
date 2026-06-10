@@ -29,7 +29,7 @@ class PenjualanSeeder extends Seeder
             ],
             [
                 'customer'   => 'Siti Rahayu',
-                'no_faktur'  => 'INV-20260402-001',
+                'no_faktur'  => 'INV-STR-000001',
                 'tanggal'    => '2026-04-02 10:30:00',
                 'items'      => [
                     ['sku' => 'MNM-002', 'qty' => 2, 'diskon' => 2000],
@@ -39,7 +39,7 @@ class PenjualanSeeder extends Seeder
             ],
             [
                 'customer'   => 'Umum',
-                'no_faktur'  => 'INV-20260403-001',
+                'no_faktur'  => 'INV-STR-000002',
                 'tanggal'    => '2026-04-03 14:00:00',
                 'items'      => [
                     ['sku' => 'MKN-002', 'qty' => 5, 'diskon' => 0],
@@ -48,7 +48,7 @@ class PenjualanSeeder extends Seeder
             ],
             [
                 'customer'   => 'Agus Permadi',
-                'no_faktur'  => 'INV-20260405-001',
+                'no_faktur'  => 'INV-STR-000003',
                 'tanggal'    => '2026-04-05 11:20:00',
                 'items'      => [
                     ['sku' => 'ELK-001', 'qty' => 3, 'diskon' => 5000],
@@ -57,7 +57,7 @@ class PenjualanSeeder extends Seeder
             ],
             [
                 'customer'   => 'Dewi Lestari',
-                'no_faktur'  => 'INV-20260407-001',
+                'no_faktur'  => 'INV-STR-000004',
                 'tanggal'    => '2026-04-07 16:45:00',
                 'items'      => [
                     ['sku' => 'PKN-001', 'qty' => 2, 'diskon' => 10000],
