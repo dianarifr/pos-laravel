@@ -64,6 +64,12 @@
             line-height: 1.4;
         }
 
+        .meta-wrapper {
+            display: flex;
+            justify-content: flex-end; /* Memaksa semua anak di dalamnya berbaris di kanan */
+            width: 100%;
+        }
+
         .invoice-box {
             padding-left: 10px;
             display: flex;
@@ -145,6 +151,12 @@
             margin-bottom: 4px;
         }
 
+        .faktur-box {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
         .summary-box {
             border: 1px solid #111;
         }
@@ -204,7 +216,7 @@
         }
 
         @page {
-            size: A4 portrait;
+            size: A5 portrait;
             margin: 0;
         }
 
@@ -266,23 +278,26 @@
                 <div class="store-text">Telp: {{ $settings['no_hp_toko'] }}</div>
             </div>
 
-            <div class="invoice-box">
-                <div class="invoice-title">FAKTUR PENJUALAN</div>
-                <div class="meta-row"><span>No. Faktur</span><span>:</span><span>#{{ $penjualan->no_faktur }}</span>
-                </div>
-                <div class="meta-row"><span>Tanggal</span><span>:</span><span>{{ $penjualan->tanggal?->format('d-m-Y
-                        H:i') }}</span></div>
-                <div class="meta-row"><span>Kasir</span><span>:</span><span>{{ $penjualan->user->name ?? '-' }}</span>
-                </div>
-                <div class="meta-row"><span>Status</span><span>:</span><span>{{ $penjualan->status->label() }}</span>
+            <div class="meta-wrapper">
+                <div class="invoice-box">
+                    <div class="meta-row"><span>No. Faktur</span><span>:</span><span>#{{ $penjualan->no_faktur }}</span></div>
+                    <div class="meta-row"><span>Tanggal</span><span>:</span><span>{{ $penjualan->tanggal?->format('d-m-Y H:i') }}</span></div>
+                    <div class="meta-row"><span>Kepada Yth</span><span>:</span><span>{{ $penjualan->customer->nama ?? 'Pelanggan Umum' }}</span></div>
+                    {{-- <div class="meta-row"><span>Kasir</span><span>:</span><span>{{ $penjualan->user->name ?? '-' }}</span></div>
+                    <div class="meta-row"><span>Status</span><span>:</span><span>{{ $penjualan->status->label() }}</span></div> --}}
+                    <div class="meta-row"><span>Sales</span><span>:</span><span>.................................</span></div>
                 </div>
             </div>
         </div>
 
-        <div class="recipient">
+        {{-- <div class="recipient">
             <div class="recipient-title">Kepada Yth:</div>
             <div class="recipient-name">{{ $penjualan->customer->nama ?? 'Pelanggan Umum' }}</div>
             <div>{{ $penjualan->customer->alamat ?? '-' }}</div>
+        </div> --}}
+
+        <div class="faktur-box">
+            <div class="invoice-title">FAKTUR PENJUALAN</div>
         </div>
 
         <table class="items-table">
@@ -314,8 +329,12 @@
 
         <div class="footer-wrap">
             <div class="terbilang-box">
-                <div class="terbilang-title">TERBILANG</div>
-                <div><em>{{ $terbilang }}</em></div>
+                <div class="terbilang-title">Catatan</div>
+                <div class="terbilang-title">&nbsp;</div>
+                <div class="terbilang-title">&nbsp;</div>
+                <div class="terbilang-title">&nbsp;</div>
+                {{-- <div>{{ $penjualan->catatan ?? '-' }}</div> --}}
+                <div class="terbilang-title">Perhatian!!</div>
                 @if (!empty($settings['pesan_faktur']))
                 <div class="message">{{ $settings['pesan_faktur'] }}</div>
                 @endif

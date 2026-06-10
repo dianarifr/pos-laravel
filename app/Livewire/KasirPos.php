@@ -329,13 +329,14 @@ class KasirPos extends Component
 
     private function generateNoFaktur(): string
     {
-        $prefix = 'INV/' . now()->format('Ymd') . '/';
-        $last = Penjualan::where('no_faktur', 'like', $prefix . '%')
+        $lastThisMonth = Penjualan::whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
             ->orderByDesc('id')
             ->value('no_faktur');
 
-        $seq = $last ? ((int) substr($last, -4)) + 1 : 1;
-        return $prefix . str_pad($seq, 4, '0', STR_PAD_LEFT);
+        $seq = $lastThisMonth ? ((int) substr($lastThisMonth, -6)) + 1 : 1;
+
+        return 'INV-STR-' . str_pad($seq, 6, '0', STR_PAD_LEFT);
     }
 
     public function render()
