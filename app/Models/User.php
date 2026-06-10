@@ -23,9 +23,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             : null;
     }
 
+    const ROLE_OWNER = 'Owner';
     const ROLE_ADMIN = 'Admin';
-    const ROLE_KASIR = 'Kasir';
-    const ROLE_GUDANG = 'Gudang';
 
     protected $fillable = [
         'name',
@@ -50,6 +49,6 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasAnyRole([self::ROLE_ADMIN, self::ROLE_KASIR, self::ROLE_GUDANG]);
+        return $this->hasAnyRole([self::ROLE_ADMIN, self::ROLE_OWNER]);
     }
 }

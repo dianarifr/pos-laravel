@@ -54,11 +54,6 @@ class PenjualanResource extends Resource
         return false;
     }
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasAnyRole(['Admin', 'Kasir']) ?? false;
-    }
-
     public static function form(Form $form): Form
     {
         return $form->schema([]);
@@ -159,7 +154,7 @@ class PenjualanResource extends Resource
                         ->color('danger')
                         ->visible(
                             fn(Penjualan $record) =>
-                            ! $record->trashed() && Auth::user()?->hasRole('Admin')
+                            ! $record->trashed() && Auth::user()?->hasRole('Owner')
                         )
                         ->form([
                             Forms\Components\Textarea::make('void_reason')
@@ -175,10 +170,10 @@ class PenjualanResource extends Resource
                         ->requiresConfirmation(false)
                         ->action(function (Penjualan $record, array $data): void {
                             // Security check ulang di sisi server
-                            if (! Auth::user()?->hasRole('Admin')) {
+                            if (! Auth::user()?->hasRole('Owner')) {
                                 Notification::make()
                                     ->title('Akses Ditolak')
-                                    ->body('Hanya Admin yang dapat membatalkan transaksi.')
+                                    ->body('Hanya Owner yang dapat membatalkan transaksi.')
                                     ->danger()
                                     ->send();
                                 return;

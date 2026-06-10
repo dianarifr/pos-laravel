@@ -22,11 +22,6 @@ class CustomerResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasRole('Admin') ?? false;
-    }
-
     public static function form(Form $form): Form
     {
         return $form->schema([

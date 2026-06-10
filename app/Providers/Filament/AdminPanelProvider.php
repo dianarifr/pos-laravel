@@ -43,7 +43,6 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-computer-desktop')
                     ->group('Kasir')
                     ->sort(0)
-                    ->visible(fn(): bool => auth()->user()?->hasAnyRole(['Admin', 'Kasir']) ?? false)
                     ->openUrlInNewTab(),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')

@@ -24,11 +24,6 @@ class BarangResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasAnyRole(['Admin', 'Gudang']) ?? false;
-    }
-
     public static function form(Form $form): Form
     {
         return $form->schema([

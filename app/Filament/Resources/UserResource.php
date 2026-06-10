@@ -18,11 +18,6 @@ class UserResource extends Resource
     protected static ?string $navigationLabel = 'User';
     protected static ?int $navigationSort = 1;
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasAnyRole(['Admin']) ?? false;
-    }
-
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -30,8 +25,7 @@ class UserResource extends Resource
                 ->label('Nama')
                 ->required(),
             Forms\Components\TextInput::make('email')
-                ->label('Email')
-                ->email()
+                ->label('Username')
                 ->unique(ignoreRecord: true)
                 ->required()
                 ->readonly(fn (string $context): bool => $context === 'edit'),
@@ -71,13 +65,11 @@ class UserResource extends Resource
             ->badge()
             ->color(fn (string $state): string => match ($state) {
                 'Admin' => 'danger',
-                'Kasir' => 'success',
-                'Gudang' => 'warning',
+                'Owner' => 'success',
                 default => 'gray',
             }),
             Tables\Columns\ImageColumn::make('profile_picture')->label('Foto')->circular(),
             Tables\Columns\TextColumn::make('address')->label('Alamat')->limit(20),
-            Tables\Columns\TextColumn::make('deleted_at')->label('Dihapus')->since(),
         ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),

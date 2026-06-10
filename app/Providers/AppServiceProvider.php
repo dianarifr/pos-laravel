@@ -7,6 +7,7 @@ use App\Models\Pembelian;
 use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\StokOpname;
+use App\Models\User;
 use App\Observers\PembelianDetailObserver;
 use App\Observers\PembelianObserver;
 use App\Observers\PenjualanDetailObserver;
@@ -32,5 +33,26 @@ class AppServiceProvider extends ServiceProvider
         StokOpname::observe(StokOpnameObserver::class);
 
         Gate::policy(StokOpname::class, StokOpnamePolicy::class);
+
+        Gate::before(function (User $user, string $ability, $arguments) {
+            $generalAbilities = ['viewAny', 'view', 'create'];
+            if ($user->hasRole('Owner') && in_array($ability, $generalAbilities)) {
+                return true;
+            }
+
+            if ($user->hasRole('Admin')) {
+                $model = is_array($arguments) ? ($arguments[0] ?? null) : $arguments;
+                $modelClass = is_object($model) ? get_class($model) : $model;
+
+                $allowedModels = [
+                    \App\Models\Penjualan::class,
+                    \App\Models\Pembelian::class,
+                ];
+
+                if ($ability === 'viewAny' && !in_array($modelClass, $allowedModels)) {
+                    return false;
+                }
+            }
+        });
     }
 }

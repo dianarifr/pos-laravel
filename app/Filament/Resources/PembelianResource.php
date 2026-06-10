@@ -35,11 +35,6 @@ class PembelianResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->hasAnyRole(['Admin', 'Gudang']) ?? false;
-    }
-
     public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
     {
         return false;
@@ -263,7 +258,7 @@ class PembelianResource extends Resource
                     ->label('Batalkan')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn(Pembelian $record) => ! $record->trashed() && Auth::user()?->hasRole('Admin'))
+                    ->visible(fn(Pembelian $record) => ! $record->trashed() && Auth::user()?->hasRole('Owner'))
                     ->form([
                         Forms\Components\Textarea::make('void_reason')
                             ->label('Alasan Pembatalan')

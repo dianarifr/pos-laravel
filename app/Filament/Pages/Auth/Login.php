@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\View;
 use Filament\Forms\Form;
@@ -17,7 +16,12 @@ class Login extends BaseLogin
     {
         return $form
             ->schema([
-                $this->getEmailFormComponent(),
+                // $this->getEmailFormComponent(),
+                TextInput::make('email')
+                    ->label('Username')
+                    ->required()
+                    ->autocomplete()
+                    ->autofocus(),
                 $this->getPasswordFormComponent(),
                 View::make('components.captcha-image')
                     ->columnSpanFull(),
@@ -46,6 +50,11 @@ class Login extends BaseLogin
             'email' => $data['email'],
             'password' => $data['password'],
         ];
+    }
+
+    public function getHeading(): string
+    {
+        return '';
     }
 
     #[On('refreshCaptcha')]
