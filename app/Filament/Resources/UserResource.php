@@ -46,13 +46,10 @@ class UserResource extends Resource
                 ->placeholder(fn (string $context): string => $context === 'edit' ? 'Kosongkan jika tidak ingin mengubah password' : ''),
             Forms\Components\Textarea::make('address')
                 ->label('Alamat'),
-            Forms\Components\Select::make('role')
-                ->label('Role')
-                ->options([
-                    User::ROLE_ADMIN => 'Admin',
-                    User::ROLE_KASIR => 'Kasir',
-                    User::ROLE_GUDANG => 'Gudang',
-                ])
+            Forms\Components\Select::make('roles')
+                ->label('Role Akses')
+                ->relationship('roles', 'name')
+                ->preload()
                 ->required(),
             Forms\Components\FileUpload::make('profile_picture')
                 ->label('Profile Picture')
@@ -69,7 +66,15 @@ class UserResource extends Resource
         return $table->columns([
             Tables\Columns\TextColumn::make('name')->label('Nama')->searchable(),
             Tables\Columns\TextColumn::make('email')->label('Email')->searchable(),
-            Tables\Columns\TextColumn::make('role')->label('Role')->badge(),
+            Tables\Columns\TextColumn::make('roles.name')
+            ->label('Role')
+            ->badge()
+            ->color(fn (string $state): string => match ($state) {
+                'Admin' => 'danger',
+                'Kasir' => 'success',
+                'Gudang' => 'warning',
+                default => 'gray',
+            }),
             Tables\Columns\ImageColumn::make('profile_picture')->label('Foto')->circular(),
             Tables\Columns\TextColumn::make('address')->label('Alamat')->limit(20),
             Tables\Columns\TextColumn::make('deleted_at')->label('Dihapus')->since(),
