@@ -13,7 +13,7 @@ class PenjualanSeeder extends Seeder
 {
     public function run(): void
     {
-        $user      = User::where('email', 'dian@mail.com')->first();
+        $user      = User::where('email', 'owner')->first();
         $customers = Customer::all()->keyBy('nama');
         $barangs   = Barang::all()->keyBy('sku');
 

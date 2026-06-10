@@ -15,7 +15,7 @@ class StokSeeder extends Seeder
 {
     public function run(): void
     {
-        $user    = User::where('email', 'dian@mail.com')->first();
+        $user    = User::where('email', 'owner')->first();
         $barangs = Barang::all();
 
         // --- Stok Log dari Pembelian (tipe: in) ---

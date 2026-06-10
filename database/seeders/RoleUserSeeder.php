@@ -11,38 +11,27 @@ class RoleUserSeeder extends Seeder
 {
     public function run(): void
     {
+        $ownerRole = Role::firstOrCreate(['name' => 'Owner']);
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
-        $kasirRole = Role::firstOrCreate(['name' => 'Kasir']);
-        $gudangRole = Role::firstOrCreate(['name' => 'Gudang']);
 
         $admin = User::firstOrCreate(
-            ['email' => 'dian@mail.com'],
+            ['email' => 'admin'],
             [
-                'name'     => 'Dian',
+                'name'     => 'Admin POS',
                 'password' => Hash::make('ubahsaya'),
-                'address'  => 'Jl. Admin No. 1',
+                'address'  => 'JL. BY PASS SERING SUMBAWA BESAR',
             ]
         );
-        $admin->assignRole($adminRole);
+        $admin->syncRoles($adminRole);
 
-        $kasir = User::updateOrCreate(
-            ['email' => 'kasir@mail.com'],
+        $owner = User::updateOrCreate(
+            ['email' => 'owner'],
             [
-                'name'     => 'Kasir POS',
+                'name'     => 'Owner POS',
                 'password' => Hash::make('ubahsaya'),
-                'address'  => 'Counter Kasir',
+                'address'  => 'JL. BY PASS SERING SUMBAWA BESAR',
             ]
         );
-        $kasir->syncRoles([$kasirRole]);
-
-        $gudang = User::updateOrCreate(
-            ['email' => 'gudang@mail.com'],
-            [
-                'name'     => 'Gudang POS',
-                'password' => Hash::make('ubahsaya'),
-                'address'  => 'Area Gudang',
-            ]
-        );
-        $gudang->syncRoles([$gudangRole]);
+        $owner->syncRoles([$ownerRole]);
     }
 }

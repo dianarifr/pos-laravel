@@ -13,7 +13,7 @@ class PembelianSeeder extends Seeder
 {
     public function run(): void
     {
-        $user      = User::where('email', 'dian@mail.com')->first();
+        $user      = User::where('email', 'owner')->first();
         $suppliers = Supplier::all()->keyBy('nama');
         $barangs   = Barang::all()->keyBy('sku');
 
