@@ -43,8 +43,9 @@
             border-right: 1px solid #111;
             padding-right: 10px;
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
         }
 
         .logo {
@@ -55,13 +56,21 @@
         }
 
         .store-name {
-            font-size: 15pt;
+            font-size: 10pt;
             font-weight: 700;
             letter-spacing: 0.3px;
         }
 
-        .store-text {
-            line-height: 1.4;
+        .store-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .store-logo {
+            max-height: 80px;
+            width: auto;
+            object-fit: contain;
         }
 
         .meta-wrapper {
@@ -271,11 +280,14 @@
         <div class="header">
             <div class="store-box">
                 @if ($logoUrl)
-                <img src="{{ $logoUrl }}" alt="Logo Toko" class="logo">
+                <img src="{{ $logoUrl }}" alt="Logo Toko" class="store-logo">
                 @endif
-                <div class="store-name">{{ $settings['nama_toko'] }}</div>
-                <div class="store-text">{{ $settings['alamat_toko'] }}</div>
-                <div class="store-text">Telp: {{ $settings['no_hp_toko'] }}</div>
+
+                <div class="store-info">
+                    <div class="store-name">{{ $settings['nama_toko'] }}</div>
+                    <div>{{ $settings['alamat_toko'] }}</div>
+                    <div>Telp: {{ $settings['no_hp_toko'] }}</div>
+                </div>
             </div>
 
             <div class="meta-wrapper">
