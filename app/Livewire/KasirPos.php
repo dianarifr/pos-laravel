@@ -45,19 +45,19 @@ class KasirPos extends Component
     #[Computed]
     public function totalItems(): int
     {
-        return collect($this->keranjang)->sum('qty');
+        return collect($this->keranjang)->sum(fn ($item) => (int) $item['qty']);
     }
 
     #[Computed]
     public function totalDiskon(): int
     {
-        return (int) collect($this->keranjang)->sum('diskon');
+        return collect($this->keranjang)->sum(fn ($item) => (int) $item['diskon']);
     }
 
     #[Computed]
     public function grandTotal(): int
     {
-        return (int) collect($this->keranjang)->sum('subtotal');
+        return (int) collect($this->keranjang)->sum(fn ($item) => (int) $item['subtotal']);
     }
 
     #[Computed]
@@ -145,7 +145,9 @@ class KasirPos extends Component
     {
         foreach ($this->keranjang as $i => $item) {
             if ($item['barang_id'] === $barang->id) {
-                $qtyDibutuhkan = $this->keranjang[$i]['qty'] + 1;
+                $currentQty = $this->keranjang[$i]['qty'] === '' ? 0 : (int) $this->keranjang[$i]['qty'];
+                $qtyDibutuhkan = $currentQty + 1;
+
                 if (!$this->cekStokCukup($barang, $qtyDibutuhkan)) {
                     $this->dispatch('focus-scanner');
                     return;
@@ -186,8 +188,16 @@ class KasirPos extends Component
         $this->dispatch('focus-scanner');
     }
 
-    public function updateQty(int $index, int $qty): void
+    public function updateQty(int $index, $qty): void
     {
+        if ($qty === '' || $qty === null) {
+            $this->keranjang[$index]['qty'] = '';
+            $this->keranjang[$index]['subtotal'] = 0;
+            return;
+        }
+
+        $qty = (int) $qty;
+
         if ($qty < 1) {
             $this->hapusItem($index);
             return;
@@ -232,8 +242,9 @@ class KasirPos extends Component
     private function hitungSubtotal(int $index): void
     {
         $item = $this->keranjang[$index];
-        $this->keranjang[$index]['subtotal'] =
-            ($item['harga_jual'] * $item['qty']) - $item['diskon'];
+        $qty = $item['qty'] === '' ? 0 : (int) $item['qty'];
+        $diskon = $item['diskon'] === '' ? 0 : (int) $item['diskon'];
+        $this->keranjang[$index]['subtotal'] = ($item['harga_jual'] * $qty) - $diskon;
     }
 
     // -------------------------------------------------------
@@ -245,6 +256,14 @@ class KasirPos extends Component
         if (empty($this->keranjang)) {
             $this->flashError = 'Keranjang masih kosong.';
             return;
+        }
+
+        foreach ($this->keranjang as $item) {
+            if ($item['qty'] === '' || $item['qty'] === null || (int) $item['qty'] < 1) {
+                $this->flashError = "Jumlah (QTY) untuk barang «{$item['nama_barang']}» tidak boleh kosong.";
+                $this->dispatch('focus-scanner');
+                return;
+            }
         }
 
         // Validasi ulang stok semua item di keranjang sebelum menyimpan
@@ -271,32 +290,47 @@ class KasirPos extends Component
 
         $penjualanId = null;
 
-        DB::transaction(function () use ($bayarInt, $status, $sisaBayar, &$penjualanId) {
-            $penjualan = Penjualan::create([
-                'user_id'       => Auth::id(),
-                'customer_id'   => $this->customerId,
-                'no_faktur'     => $this->noFaktur,
-                'total_harga'   => $this->grandTotal,
-                'nominal_bayar' => $bayarInt,
-                'sisa_bayar'    => $sisaBayar,
-                'status'        => $status,
-                'tanggal'       => now(),
-            ]);
+        try {
+             DB::transaction(function () use ($bayarInt, $status, $sisaBayar, &$penjualanId) {
+                foreach ($this->keranjang as $item) {
+                    $barang = Barang::where('id', $item['barang_id'])->lockForUpdate()->first();
 
-            foreach ($this->keranjang as $item) {
-                PenjualanDetail::create([
-                    'penjualan_id' => $penjualan->id,
-                    'barang_id'    => $item['barang_id'],
-                    'qty'          => $item['qty'],
-                    'harga_jual'   => $item['harga_jual'],
-                    'diskon'       => $item['diskon'],
-                    'subtotal'     => $item['subtotal'],
+                    if (!$barang || !$this->cekStokCukup($barang, $item['qty'])) {
+                        throw new \Exception("Stok barang «{$item['nama_barang']}» tidak mencukupi atau tidak ditemukan. Transaksi dibatalkan.");
+                    }
+                }
+
+                $penjualan = Penjualan::create([
+                    'user_id'       => Auth::id(),
+                    'customer_id'   => $this->customerId,
+                    'no_faktur'     => $this->noFaktur,
+                    'total_harga'   => $this->grandTotal,
+                    'nominal_bayar' => $bayarInt,
+                    'sisa_bayar'    => $sisaBayar,
+                    'status'        => $status,
+                    'tanggal'       => now(),
                 ]);
-                // Stok diupdate otomatis via PenjualanDetailObserver
-            }
 
-            $penjualanId = $penjualan->id;
-        });
+                foreach ($this->keranjang as $item) {
+                    PenjualanDetail::create([
+                        'penjualan_id' => $penjualan->id,
+                        'barang_id'    => $item['barang_id'],
+                        'qty'          => $item['qty'],
+                        'harga_jual'   => $item['harga_jual'],
+                        'diskon'       => $item['diskon'],
+                        'subtotal'     => $item['subtotal'],
+                    ]);
+                    // Stok diupdate otomatis via PenjualanDetailObserver
+                }
+
+                $penjualanId = $penjualan->id;
+            });
+        } catch (\Exception $e) {
+            // Tangkap exception jika stok tidak cukup saat antrean lock berjalan
+            $this->flashError = $e->getMessage();
+            $this->dispatch('focus-scanner');
+            return;
+        }
 
         // Kirim notifikasi sesuai status
         if ($isBelumLunas) {
