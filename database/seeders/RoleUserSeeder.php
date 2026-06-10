@@ -14,15 +14,6 @@ class RoleUserSeeder extends Seeder
         $ownerRole = Role::firstOrCreate(['name' => 'Owner']);
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
 
-        $admin = User::firstOrCreate(
-            ['email' => 'admin'],
-            [
-                'name'     => 'Admin POS',
-                'password' => Hash::make('ubahsaya'),
-                'address'  => 'JL. BY PASS SERING SUMBAWA BESAR',
-            ]
-        );
-        $admin->syncRoles($adminRole);
 
         $owner = User::updateOrCreate(
             ['email' => 'owner'],
@@ -33,5 +24,15 @@ class RoleUserSeeder extends Seeder
             ]
         );
         $owner->syncRoles([$ownerRole]);
+
+        $admin = User::firstOrCreate(
+            ['email' => 'admin'],
+            [
+                'name'     => 'Admin POS',
+                'password' => Hash::make('ubahsaya'),
+                'address'  => 'JL. BY PASS SERING SUMBAWA BESAR',
+            ]
+        );
+        $admin->syncRoles($adminRole);
     }
 }

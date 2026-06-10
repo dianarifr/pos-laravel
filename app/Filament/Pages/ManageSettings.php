@@ -23,17 +23,11 @@ class ManageSettings extends Page implements HasForms
     protected static ?int    $navigationSort  = 99;
     protected static string  $view            = 'filament.pages.manage-settings';
 
-    /** @var array<string, mixed> */
     public ?array $data = [];
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('Admin') ?? false;
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return static::canAccess();
+        return auth()->user()?->hasRole('Owner') ?? false;
     }
 
     public function mount(): void
