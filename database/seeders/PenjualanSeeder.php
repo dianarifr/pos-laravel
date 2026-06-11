@@ -19,15 +19,6 @@ class PenjualanSeeder extends Seeder
 
         $transaksi = [
             [
-                'customer'   => 'Budi Santoso',
-                'no_faktur'  => 'INV-20260401-001',
-                'tanggal'    => '2026-04-01 09:15:00',
-                'items'      => [
-                    ['sku' => 'MKN-001', 'qty' => 5, 'diskon' => 0],
-                    ['sku' => 'MNM-003', 'qty' => 10, 'diskon' => 0],
-                ],
-            ],
-            [
                 'customer'   => 'Siti Rahayu',
                 'no_faktur'  => 'INV-STR-000001',
                 'tanggal'    => '2026-04-02 10:30:00',
@@ -65,6 +56,15 @@ class PenjualanSeeder extends Seeder
                     ['sku' => 'MNM-001', 'qty' => 1, 'diskon' => 0],
                 ],
             ],
+            [
+                'customer'   => 'Budi Santoso',
+                'no_faktur'  => 'INV-STR-000005',
+                'tanggal'    => '2026-04-01 09:15:00',
+                'items'      => [
+                    ['sku' => 'MKN-001', 'qty' => 5, 'diskon' => 0],
+                    ['sku' => 'MNM-003', 'qty' => 10, 'diskon' => 0],
+                ],
+            ],
         ];
 
         foreach ($transaksi as $data) {
@@ -98,6 +98,7 @@ class PenjualanSeeder extends Seeder
                     'barang_id'    => $barang->id,
                     'qty'          => $item['qty'],
                     'harga_jual'   => $barang->harga_jual,
+                    'harga_beli'   => $barang->harga_beli,
                     'diskon'       => $item['diskon'],
                     'subtotal'     => $subtotal,
                 ]);

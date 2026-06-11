@@ -163,6 +163,7 @@ class KasirPos extends Component
             'sku'         => $barang->sku,
             'nama_barang' => $barang->nama_barang,
             'harga_jual'  => (int) $barang->harga_jual,
+            'harga_beli'  => (int) $barang->harga_beli,
             'qty'         => 1,
             'diskon'      => 0,
             'subtotal'    => (int) $barang->harga_jual,
@@ -317,6 +318,7 @@ class KasirPos extends Component
                         'barang_id'    => $item['barang_id'],
                         'qty'          => $item['qty'],
                         'harga_jual'   => $item['harga_jual'],
+                        'harga_beli'   => $item['harga_beli'],
                         'diskon'       => $item['diskon'],
                         'subtotal'     => $item['subtotal'],
                     ]);
