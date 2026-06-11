@@ -46,7 +46,6 @@ class AppServiceProvider extends ServiceProvider
 
                 $allowedModels = [
                     \App\Models\Penjualan::class,
-                    \App\Models\Pembelian::class,
                 ];
 
                 if ($ability === 'viewAny' && !in_array($modelClass, $allowedModels)) {

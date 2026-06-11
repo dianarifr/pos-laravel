@@ -198,7 +198,7 @@
         }
 
         .signature {
-            margin-top: auto;
+            /* margin-top: auto; */
             padding-top: 18px;
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -225,7 +225,7 @@
         }
 
         @page {
-            size: A5 portrait;
+            size: 215mm 165mm;
             margin: 0;
         }
 
