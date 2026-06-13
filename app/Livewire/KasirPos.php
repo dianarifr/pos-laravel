@@ -206,12 +206,9 @@ class KasirPos extends Component
         // Cek stok sebelum menambah qty
         $barang = Barang::find($this->keranjang[$index]['barang_id']);
         if ($barang && !$this->cekStokCukup($barang, $qty)) {
-            // Jika stok tidak cukup, set qty ke stok maksimal yang tersedia & tampilkan error.
-            // Ini akan memaksa input untuk update ke nilai yang valid.
-            $this->keranjang[$index]['qty'] = $barang->stok;
-            $this->hitungSubtotal($index);
+            $this->keranjang[$index]['qty'] = $qty;
             $this->dispatch('focus-scanner');
-            return; // Error message sudah di-set oleh cekStokCukup()
+            return;
         }
 
         $this->keranjang[$index]['qty'] = $qty;
@@ -276,7 +273,12 @@ class KasirPos extends Component
         // Validasi ulang stok semua item di keranjang sebelum menyimpan
         foreach ($this->keranjang as $item) {
             $barang = Barang::find($item['barang_id']);
-            if (!$barang || !$this->cekStokCukup($barang, $item['qty'])) {
+            if (!$barang) {
+                $this->flashError = "Barang «{$item['nama_barang']}» tidak ditemukan. Transaksi dibatalkan.";
+                $this->dispatch('focus-scanner');
+                return;
+            }
+            if (!$this->cekStokCukup($barang, (int) $item['qty'])) {
                 $this->flashError .= ' Transaksi dibatalkan.';
                 $this->dispatch('focus-scanner');
                 return;

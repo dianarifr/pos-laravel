@@ -103,26 +103,15 @@
                         placeholder="0">
                 </div>
 
-                {{-- Baris 4: Kembalian / Kekurangan --}}
-                @php
-                $bayarInt = (int) preg_replace('/\D/', '', $this->bayar);
-                $selisihHutang = max(0, $this->grandTotal - $bayarInt);
-                @endphp
-                @if ($selisihHutang > 0 && $this->grandTotal > 0)
+                {{-- Baris 4: Kembalian / Kekurangan (Alpine-driven, instant) --}}
                 <div class="flex items-center gap-2">
-                    <span class="font-mono text-xs font-bold text-red-400">KEKURANGAN</span>
-                    <span class="text-2xl font-black text-red-400 tabular-nums">
-                        Rp {{ number_format($selisihHutang, 0, ',', '.') }}
-                    </span>
+                    <span class="font-mono text-xs font-bold"
+                          :class="kekurangan > 0 && grandTotal > 0 ? 'text-red-400' : 'text-emerald-400'"
+                          x-text="kekurangan > 0 && grandTotal > 0 ? 'KEKURANGAN' : 'KEMBALIAN'"></span>
+                    <span class="text-2xl font-black tabular-nums"
+                          :class="kekurangan > 0 && grandTotal > 0 ? 'text-red-400' : 'text-emerald-400'"
+                          x-text="'Rp ' + (kekurangan > 0 && grandTotal > 0 ? kekurangan : kembalian).toLocaleString('id-ID')"></span>
                 </div>
-                @else
-                <div class="flex items-center gap-2">
-                    <span class="font-mono text-xs font-bold text-emerald-400">KEMBALIAN</span>
-                    <span class="text-2xl font-black text-emerald-400 tabular-nums">
-                        Rp {{ number_format($this->kembali, 0, ',', '.') }}
-                    </span>
-                </div>
-                @endif
             </div>
 
         </div>
@@ -401,15 +390,33 @@
     function kasirPos() {
     return {
         bayarDisplay: '',
+        grandTotal: 0,
         waktu: '',
         sukses: false,
         showKonfirm: false,
         _timer: null,
+        _bayarTimer: null,
+
+        get kembalian() {
+            const bayarRaw = parseInt(this.bayarDisplay.replace(/\D/g, '')) || 0;
+            return Math.max(0, bayarRaw - this.grandTotal);
+        },
+
+        get kekurangan() {
+            const bayarRaw = parseInt(this.bayarDisplay.replace(/\D/g, '')) || 0;
+            return Math.max(0, this.grandTotal - bayarRaw);
+        },
 
         init() {
             this.tickWaktu();
             setInterval(() => this.tickWaktu(), 1000);
-            this.$nextTick(() => this.focusScanner());
+            this.$nextTick(() => {
+                this.grandTotal = {{ $this->grandTotal }};
+                this.$wire.watch('keranjang', (keranjang) => {
+                    this.grandTotal = keranjang.reduce((sum, item) => sum + (parseInt(item.subtotal) || 0), 0);
+                });
+                this.focusScanner();
+            });
         },
 
         tickWaktu() {
@@ -446,16 +453,20 @@
         },
 
         syncBayar() {
-            // Format ribuan untuk tampilan, kirim angka murni ke Livewire
             const raw = this.bayarDisplay.replace(/\D/g, '');
             this.bayarDisplay = raw ? parseInt(raw).toLocaleString('id-ID') : '';
-            this.$wire.set('bayar', raw);
+            // Debounce agar tidak kirim tiap karakter — mencegah race condition
+            clearTimeout(this._bayarTimer);
+            this._bayarTimer = setTimeout(() => {
+                this.$wire.set('bayar', raw);
+            }, 300);
         },
 
         showSukses() {
             this.sukses = true;
             this.showKonfirm = false;
             this.bayarDisplay = '';
+            clearTimeout(this._bayarTimer);
             this.$wire.set('bayar', '');
             clearTimeout(this._timer);
             this._timer = setTimeout(() => { this.sukses = false; }, 3000);
