@@ -161,7 +161,7 @@ class KasirPos extends Component
             'barang_id'   => $barang->id,
             'sku'         => $barang->sku,
             'nama_barang' => $barang->nama_barang,
-            'harga_jual'  => (int) $barang->harga_jual,
+            'harga_jual'  => (int) $barang->harga_beli,
             'harga_beli'  => (int) $barang->harga_beli,
             'qty'         => 1,
             'diskon'      => 0,
