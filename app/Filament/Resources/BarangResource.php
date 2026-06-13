@@ -65,12 +65,12 @@ class BarangResource extends Resource
                             ->required()
                             ->minValue(0),
 
-                        Forms\Components\TextInput::make('harga_jual')
+                        /* Forms\Components\TextInput::make('harga_jual')
                             ->label('Harga Jual')
                             ->numeric()
                             ->prefix('Rp')
                             ->required()
-                            ->minValue(0),
+                            ->minValue(0), */
 
                         Forms\Components\TextInput::make('stok_minimal')
                             ->label('Stok Minimal')
@@ -106,10 +106,10 @@ class BarangResource extends Resource
                     ->money('IDR')
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('harga_jual')
+                /* Tables\Columns\TextColumn::make('harga_jual')
                     ->label('Harga Jual')
                     ->money('IDR')
-                    ->sortable(),
+                    ->sortable(), */
 
                 Tables\Columns\TextColumn::make('stok')
                     ->label('Stok Akhir')

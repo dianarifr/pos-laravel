@@ -9,7 +9,6 @@ use App\Models\PenjualanDetail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 class KasirPos extends Component
@@ -17,7 +16,7 @@ class KasirPos extends Component
     // Scanner
     public string $sku = '';
 
-    // Keranjang: array of ['barang_id', 'sku', 'nama_barang', 'harga_jual', 'qty', 'diskon', 'subtotal']
+    // Keranjang: array of ['barang_id', 'sku', 'nama_barang', 'harga_jual', 'harga_beli', 'qty', 'diskon', 'subtotal']
     public array $keranjang = [];
 
     // Pembayaran
@@ -166,7 +165,7 @@ class KasirPos extends Component
             'harga_beli'  => (int) $barang->harga_beli,
             'qty'         => 1,
             'diskon'      => 0,
-            'subtotal'    => (int) $barang->harga_jual,
+            'subtotal'    => (int) $barang->harga_beli,
         ];
     }
 
@@ -218,6 +217,13 @@ class KasirPos extends Component
         $this->keranjang[$index]['qty'] = $qty;
         $this->hitungSubtotal($index);
         $this->flashError = null;
+    }
+
+    public function updateHargaJual(int $index, $harga): void
+    {
+        $harga = (int) preg_replace('/\D/', '', (string) $harga);
+        $this->keranjang[$index]['harga_jual'] = max(0, $harga);
+        $this->hitungSubtotal($index);
     }
 
     public function updateDiskon(int $index, int $diskon): void

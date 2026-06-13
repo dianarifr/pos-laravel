@@ -166,7 +166,7 @@ class PembelianResource extends Resource
                                 ->required()
                                 ->minValue(1)
                                 ->live()
-                                ->columnSpan(1),
+                                ->columnSpan(2),
 
                             Forms\Components\Placeholder::make('subtotal')
                                 ->label('Subtotal')
@@ -179,7 +179,7 @@ class PembelianResource extends Resource
                                 })
                                 ->columnSpan(2),
 
-                            Forms\Components\Checkbox::make('update_harga_jual_master')
+                            /* Forms\Components\Checkbox::make('update_harga_jual_master')
                                 ->label('Update Harga Jual')
                                 ->live()
                                 ->columnSpan(2),
@@ -190,7 +190,7 @@ class PembelianResource extends Resource
                                 ->minValue(0)
                                 ->visible(fn(Forms\Get $get): bool => (bool) $get('update_harga_jual_master'))
                                 ->required(fn(Forms\Get $get): bool => (bool) $get('update_harga_jual_master'))
-                                ->columnSpan(2),
+                                ->columnSpan(2), */
                         ])
                         ->columnSpanFull()
                         ->required(),
@@ -387,9 +387,9 @@ class PembelianResource extends Resource
                                     ->label('Subtotal')
                                     ->money('IDR', locale: 'id'),
 
-                                Infolists\Components\IconEntry::make('update_harga_jual_master')
+                                /* Infolists\Components\IconEntry::make('update_harga_jual_master')
                                     ->label('Update Harga Jual')
-                                    ->boolean(),
+                                    ->boolean(), */
                             ]),
                     ]),
             ]);
