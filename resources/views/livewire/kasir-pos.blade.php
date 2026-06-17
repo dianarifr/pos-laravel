@@ -241,7 +241,7 @@
                     <button wire:click="updateQty({{ $i }}, {{ (int) $item['qty'] + 1 }})"
                         class="w-6 h-6 font-bold leading-none text-center bg-gray-200 rounded hover:bg-gray-300">+</button>
                 </div>
-                <div class="col-span-2 text-right" x-data="hargaInput({{ $item['harga_beli'] }}, {{ $i }})">
+                <div class="col-span-2 text-right" x-data="hargaInput({{ $item['harga_jual'] }}, {{ $i }})">
                     <input type="text" inputmode="numeric" x-model="display" @input="sync()"
                         class="w-full text-right font-mono border border-gray-300 rounded px-1 py-0.5 text-sm focus:outline-none focus:border-blue-400">
                 </div>
@@ -378,10 +378,10 @@
 <script>
     function hargaInput(initialValue, index) {
         return {
-            display: initialValue ? parseInt(initialValue).toLocaleString('id-ID') : '',
+            display: initialValue ? parseInt(initialValue).toLocaleString('id-ID') : '0',
             sync() {
                 const raw = this.display.replace(/\D/g, '');
-                this.display = raw ? parseInt(raw).toLocaleString('id-ID') : '';
+                this.display = raw ? parseInt(raw).toLocaleString('id-ID') : '0';
                 this.$wire.updateHargaJual(index, parseInt(raw) || 0);
             }
         }

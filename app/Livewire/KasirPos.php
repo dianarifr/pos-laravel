@@ -161,11 +161,11 @@ class KasirPos extends Component
             'barang_id'   => $barang->id,
             'sku'         => $barang->sku,
             'nama_barang' => $barang->nama_barang,
-            'harga_jual'  => (int) $barang->harga_beli,
+            'harga_jual'  => 0,
             'harga_beli'  => (int) $barang->harga_beli,
             'qty'         => 1,
             'diskon'      => 0,
-            'subtotal'    => (int) $barang->harga_beli,
+            'subtotal'    => 0,
         ];
     }
 
@@ -262,16 +262,18 @@ class KasirPos extends Component
             return;
         }
 
+
         foreach ($this->keranjang as $item) {
             if ($item['qty'] === '' || $item['qty'] === null || (int) $item['qty'] < 1) {
                 $this->flashError = "Jumlah (QTY) untuk barang «{$item['nama_barang']}» tidak boleh kosong.";
                 $this->dispatch('focus-scanner');
                 return;
             }
-        }
-
-        // Validasi ulang stok semua item di keranjang sebelum menyimpan
-        foreach ($this->keranjang as $item) {
+            if ($item['harga_jual'] === '' || $item['harga_jual'] === null || (int) $item['harga_jual'] < 1) {
+                $this->flashError = "Harga untuk barang «{$item['nama_barang']}» tidak boleh kosong.";
+                $this->dispatch('focus-scanner');
+                return;
+            }
             $barang = Barang::find($item['barang_id']);
             if (!$barang) {
                 $this->flashError = "Barang «{$item['nama_barang']}» tidak ditemukan. Transaksi dibatalkan.";
