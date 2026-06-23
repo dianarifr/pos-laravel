@@ -29,7 +29,7 @@ class ProdukStokKritis extends BaseWidget
                     ->limit(10)
             )
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('nama_barang')
                     ->label('Nama Produk'),
 
                 Tables\Columns\TextColumn::make('stok')
