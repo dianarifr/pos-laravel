@@ -41,7 +41,6 @@ class ProdukTerlarisHariIni extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('nama_barang')
                     ->label('Nama Produk')
-                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('total_terjual')
                     ->label('Terjual')
