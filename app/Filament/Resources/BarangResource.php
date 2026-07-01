@@ -22,6 +22,12 @@ class BarangResource extends Resource
 
     protected static ?string $navigationLabel = 'Barang';
 
+    protected static ?string $modelLabel = 'Barang';
+
+    protected static ?string $pluralModelLabel = 'Barang';
+
+    protected static ?string $slug = 'barang';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
