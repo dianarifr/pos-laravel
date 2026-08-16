@@ -124,7 +124,8 @@ class PenjualanResource extends Resource
 
                 TrashedFilter::make()
                     ->label('Status Data')
-                    ->native(false),
+                    ->native(false)
+                    ->default(true),
 
                 Tables\Filters\Filter::make('tanggal')
                     ->form([
@@ -412,7 +413,6 @@ class PenjualanResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        // Override agar withTrashed bisa diakses di View page
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class]);
     }
