@@ -18,7 +18,13 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationGroup = 'Master Data';
 
-    protected static ?string $navigationLabel = 'Customer';
+    protected static ?string $navigationLabel = 'Pelanggan';
+
+    protected static ?string $modelLabel = 'Customer';
+
+    protected static ?string $pluralModelLabel = 'Customer';
+
+    protected static ?string $slug = 'customer';
 
     protected static ?int $navigationSort = 4;
 

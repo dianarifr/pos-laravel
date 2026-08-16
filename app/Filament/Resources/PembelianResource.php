@@ -270,10 +270,10 @@ class PembelianResource extends Resource
                     ->modalDescription('Hati-hati! Pembatalan ini akan mengurangi stok barang secara otomatis. Pastikan barang memang dikembalikan atau tidak jadi diterima.')
                     ->modalSubmitActionLabel('Ya, Batalkan Pembelian')
                     ->action(function (Pembelian $record, array $data): void {
-                        if (! Auth::user()?->hasRole('Admin')) {
+                        if (! Auth::user()?->hasRole('Owner')) {
                             Notification::make()
                                 ->title('Akses Ditolak')
-                                ->body('Hanya Admin yang dapat membatalkan pembelian.')
+                                ->body('Hanya Owner yang dapat membatalkan pembelian.')
                                 ->danger()
                                 ->send();
                             return;

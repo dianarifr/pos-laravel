@@ -20,6 +20,12 @@ class UnitResource extends Resource
 
     protected static ?string $navigationLabel = 'Satuan';
 
+    protected static ?string $modelLabel = 'Satuan';
+
+    protected static ?string $pluralModelLabel = 'Satuan';
+
+    protected static ?string $slug = 'satuan';
+
     protected static ?int $navigationSort = 2;
 
 
