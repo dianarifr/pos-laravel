@@ -12,6 +12,7 @@ use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -121,9 +122,9 @@ class PenjualanResource extends Resource
                         'belum_lunas' => 'Belum Lunas',
                     ]),
 
-                Tables\Filters\Filter::make('hanya_batal')
-                    ->label('Tampilkan yang dibatalkan saja')
-                    ->query(fn(Builder $q) => $q->onlyTrashed()),
+                TrashedFilter::make()
+                    ->label('Status Data')
+                    ->native(false),
 
                 Tables\Filters\Filter::make('tanggal')
                     ->form([
