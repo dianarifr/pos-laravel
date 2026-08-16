@@ -6,10 +6,13 @@ use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Widgets\Concerns\InteractsWithPageFilters; // ⚡ 1. Import Trait Filter
 use Carbon\Carbon;
 
 class StatsPenjualanHariIni extends BaseWidget
 {
+    use InteractsWithPageFilters; // ⚡ 2. Pasang Trait Filter
+
     protected static ?int $sort = 1;
 
     protected static ?string $pollingInterval = '10s';
@@ -18,17 +21,31 @@ class StatsPenjualanHariIni extends BaseWidget
 
     protected int | string | array $columnSpan = 'full';
 
+    // Formasi 3 kolom (2 baris x 3 kartu)
+    protected function getColumns(): int
+    {
+        return 3;
+    }
+
     protected function getStats(): array
     {
-        $hariIni = Carbon::today();
+        // ⚡ 3. Tangkap nilai tanggal dari filter Dashboard (default 7 hari terakhir jika kosong)
+        $startDate = !empty($this->filters['startDate'])
+            ? Carbon::parse($this->filters['startDate'])->startOfDay()
+            : Carbon::now()->subDays(6)->startOfDay();
 
-        $trxLunas = Penjualan::whereDate('created_at', $hariIni)
+        $endDate = !empty($this->filters['endDate'])
+            ? Carbon::parse($this->filters['endDate'])->endOfDay()
+            : Carbon::now()->endOfDay();
+
+        // ⚡ 4. Gunakan whereBetween untuk mengecek periode
+        $trxLunas = Penjualan::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'lunas');
 
         $countLunas = $trxLunas->count();
         $nominalLunas = $trxLunas->sum('total_harga');
 
-        $trxBelumLunas = Penjualan::whereDate('created_at', $hariIni)
+        $trxBelumLunas = Penjualan::whereBetween('created_at', [$startDate, $endDate])
             ->where('status', 'belum_lunas');
 
         $countBelumLunas = $trxBelumLunas->count();
@@ -36,35 +53,40 @@ class StatsPenjualanHariIni extends BaseWidget
 
         $totalNominalSemua = $nominalLunas + $nominalBelumLunas;
 
-        $jumlahBarangTerjual = PenjualanDetail::whereHas('penjualan', function ($query) use ($hariIni) {
-                $query->whereDate('created_at', $hariIni);
+        $jumlahBarangTerjual = PenjualanDetail::whereHas('penjualan', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
             })->sum('qty');
 
-        $detailTransaksiHariIni = PenjualanDetail::whereHas('penjualan', function ($query) use ($hariIni) {
-                $query->whereDate('created_at', $hariIni);
-            })->with('barang')->get();
+        $detailTransaksi = PenjualanDetail::whereHas('penjualan', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            })->get();
 
-        $totalProfitBersih = $detailTransaksiHariIni->sum(function ($detail) {
+        $totalProfitBersih = $detailTransaksi->sum(function ($detail) {
             return ($detail->harga_jual - $detail->harga_beli) * $detail->qty;
         });
 
         $countTrxVoid = Penjualan::onlyTrashed()
-            ->whereDate('deleted_at', $hariIni)
+            ->whereBetween('deleted_at', [$startDate, $endDate])
             ->count();
 
+        // Format label periode untuk deskripsi
+        $periodeLabel = $startDate->isSameDay($endDate)
+            ? $startDate->translatedFormat('d M Y')
+            : $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M Y');
+
         return [
-            Stat::make('Transaksi Lunas (Hari Ini)', $countLunas . ' Transaksi')
+            Stat::make('Transaksi Lunas', $countLunas . ' Transaksi')
                 ->description('Total: Rp ' . number_format($nominalLunas, 0, ',', '.'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
 
-            Stat::make('Transaksi Belum Lunas (Hari Ini)', $countBelumLunas . ' Transaksi')
+            Stat::make('Transaksi Belum Lunas', $countBelumLunas . ' Transaksi')
                 ->description('Total: Rp ' . number_format($nominalBelumLunas, 0, ',', '.'))
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning'),
 
-            Stat::make('Total Omset Hari Ini', 'Rp ' . number_format($totalNominalSemua, 0, ',', '.'))
-                ->description('Gabungan Lunas & Belum Lunas')
+            Stat::make('Total Omset', 'Rp ' . number_format($totalNominalSemua, 0, ',', '.'))
+                ->description('Periode: ' . $periodeLabel)
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('primary'),
 
@@ -74,7 +96,7 @@ class StatsPenjualanHariIni extends BaseWidget
                 ->color('emerald'),
 
             Stat::make('Barang Terjual', number_format($jumlahBarangTerjual, 0, ',', '.') . ' Pcs')
-                ->description('Total produk keluar hari ini')
+                ->description('Total unit keluar periode ini')
                 ->descriptionIcon('heroicon-m-shopping-bag')
                 ->color('info'),
 
