@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Filament\Tables;
-use App\Filament\Resources\UserResource\Pages;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -54,6 +55,11 @@ class UserResource extends Resource
                 ->directory('profile-pictures')
                 ->maxSize(1024),
         ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('email', '!=', 'dian');
     }
 
     public static function table(Table $table): Table
