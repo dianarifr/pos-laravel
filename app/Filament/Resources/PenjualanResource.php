@@ -138,6 +138,59 @@ class PenjualanResource extends Resource
                             ->when($data['sampai'], fn($q, $v) => $q->whereDate('tanggal', '<=', $v));
                     }),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('export_csv')
+                    ->label('Ekspor Excel / CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $records = $livewire->getFilteredTableQuery()->get();
+                        $filename = 'laporan-penjualan-' . now()->format('Y-m-d-His') . '.csv';
+
+                        return response()->streamDownload(function () use ($records) {
+                            $handle = fopen('php://output', 'w');
+
+                            // BOM UTF-8 agar terbaca rapi di Microsoft Excel
+                            fputs($handle, "\xEF\xBB\xBF");
+
+                            // Header Kolom
+                            fputcsv($handle, [
+                                'No. Faktur',
+                                'Tanggal & Jam',
+                                'Customer',
+                                'Kasir',
+                                'Total (Rp)',
+                                'Bayar (Rp)',
+                                'Sisa Tagihan (Rp)',
+                                'Status Pembayaran',
+                                'Status Data',
+                            ], ';');
+
+                            // Data Transaksi
+                            foreach ($records as $record) {
+                                $statusBayar = $record->status instanceof \App\Enums\StatusPenjualan
+                                    ? $record->status->label()
+                                    : ucfirst((string) $record->status);
+
+                                fputcsv($handle, [
+                                    $record->no_faktur,
+                                    $record->tanggal,
+                                    $record->customer?->nama ?? 'Umum',
+                                    $record->user?->name ?? '-',
+                                    $record->total_harga,
+                                    $record->nominal_bayar,
+                                    $record->sisa_bayar,
+                                    $statusBayar,
+                                    $record->trashed() ? 'Dibatalkan (Void)' : 'Aktif',
+                                ], ';');
+                            }
+
+                            fclose($handle);
+                        }, $filename, [
+                            'Content-Type' => 'text/csv; charset=UTF-8',
+                        ]);
+                    }),
+            ])
             ->actions([
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\ViewAction::make(),

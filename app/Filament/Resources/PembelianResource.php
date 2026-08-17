@@ -251,6 +251,49 @@ class PembelianResource extends Resource
                     ->label('Tampilkan yang dibatalkan saja')
                     ->query(fn(Builder $q) => $q->onlyTrashed()),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('export_csv')
+                    ->label('Ekspor Excel / CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('success')
+                    ->action(function ($livewire) {
+                        $records = $livewire->getFilteredTableQuery()->get();
+                        $filename = 'laporan-pembelian-' . now()->format('Y-m-d-His') . '.csv';
+
+                        return response()->streamDownload(function () use ($records) {
+                            $handle = fopen('php://output', 'w');
+
+                            // BOM UTF-8 agar terbaca rapi di Excel
+                            fputs($handle, "\xEF\xBB\xBF");
+
+                            // Header Kolom
+                            fputcsv($handle, [
+                                'Nomor Nota',
+                                'Supplier',
+                                'Tanggal',
+                                'Status Pembayaran',
+                                'Grand Total (Rp)',
+                                'Status Data',
+                            ], ';');
+
+                            // Data Transaksi
+                            foreach ($records as $record) {
+                                fputcsv($handle, [
+                                    $record->no_nota,
+                                    $record->supplier?->nama ?? '-',
+                                    $record->tanggal,
+                                    ucfirst($record->status_pembayaran),
+                                    $record->total_harga,
+                                    $record->trashed() ? 'Dibatalkan (Void)' : 'Aktif',
+                                ], ';');
+                            }
+
+                            fclose($handle);
+                        }, $filename, [
+                            'Content-Type' => 'text/csv; charset=UTF-8',
+                        ]);
+                    }),
+            ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
 
