@@ -30,7 +30,7 @@ class Dashboard extends BaseDashboard
                     ->schema([
                         DatePicker::make('startDate')
                             ->label('Mulai Tanggal')
-                            ->default(now()->subDays(6)->toDateString())
+                            ->default(now()->startOfMonth()->toDateString())
                             ->native(false)
                             ->maxDate(now()),
 
