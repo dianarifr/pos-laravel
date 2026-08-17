@@ -69,6 +69,10 @@ class StatsPenjualanHariIni extends BaseWidget
             ->whereBetween('deleted_at', [$startDate, $endDate])
             ->count();
 
+        $totalPengeluaran = \App\Models\Pengeluaran::whereBetween('tanggal', [$startDate, $endDate])->sum('nominal');
+
+        $totalProfitBersih = $totalProfitBersih - $totalPengeluaran;
+
         // Format label periode untuk deskripsi
         $periodeLabel = $startDate->isSameDay($endDate)
             ? $startDate->translatedFormat('d M Y')
@@ -91,7 +95,7 @@ class StatsPenjualanHariIni extends BaseWidget
                 ->color('primary'),
 
             Stat::make('Estimasi Profit Bersih', 'Rp ' . number_format($totalProfitBersih, 0, ',', '.'))
-                ->description('Omset dikurangi Harga Beli saat transaksi')
+                ->description('Omset - (Harga Beli trx + Pengeluaran)')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('emerald'),
 

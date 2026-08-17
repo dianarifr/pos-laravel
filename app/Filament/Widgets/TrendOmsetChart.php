@@ -59,8 +59,10 @@ class TrendOmsetChart extends ChartWidget
                 return ($detail->harga_jual - $detail->harga_beli) * $detail->qty;
             });
 
+            $totalPengeluaran = \App\Models\Pengeluaran::whereDate('tanggal', $date)->sum('nominal');
+
             $dataOmset[] = $omsetHariItu;
-            $dataProfit[] = $profitHariItu;
+            $dataProfit[] = $profitHariItu - $totalPengeluaran;
             $labelTanggal[] = $date->translatedFormat('d M');
         }
 
