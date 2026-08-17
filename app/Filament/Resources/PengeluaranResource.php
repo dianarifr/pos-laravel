@@ -105,12 +105,6 @@ class PengeluaranResource extends Resource
                     ->label('Dicatat Oleh')
                     ->sortable()
                     ->placeholder('-'),
-
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Dibuat')
-                    ->dateTime('d M Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('jenis_pengeluaran_id')

@@ -129,8 +129,8 @@ class PenjualanResource extends Resource
 
                 Tables\Filters\Filter::make('tanggal')
                     ->form([
-                        Forms\Components\DatePicker::make('dari')->label('Dari'),
-                        Forms\Components\DatePicker::make('sampai')->label('Sampai'),
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query

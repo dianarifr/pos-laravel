@@ -250,6 +250,16 @@ class PembelianResource extends Resource
                 Tables\Filters\Filter::make('hanya_batal')
                     ->label('Tampilkan yang dibatalkan saja')
                     ->query(fn(Builder $q) => $q->onlyTrashed()),
+                Tables\Filters\Filter::make('tanggal')
+                    ->form([
+                        Forms\Components\DatePicker::make('dari')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('sampai')->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['dari'],   fn($q, $v) => $q->whereDate('tanggal', '>=', $v))
+                            ->when($data['sampai'], fn($q, $v) => $q->whereDate('tanggal', '<=', $v));
+                    }),
             ])
             ->headerActions([
                 Tables\Actions\Action::make('export_csv')
